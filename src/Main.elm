@@ -104,7 +104,15 @@ viewTimeSchedule classTimeList =
             List.indexedMap Tuple.pair
 
         showColumn ( n, a ) =
-            Input.button [ BD.color (rgb255 0 0 0), BD.width 1, BD.solid ] { onPress = Just (ClickedTime n), label = column [] [ el [ alignRight ] <| text a.startTime, el [ alignRight ] <| text "   ~   ", el [ alignRight ] <| text a.finishTime ] }
+            Input.button [ BD.color (rgb255 0 0 0), BD.width 1, BD.solid ]
+                { onPress = Just (ClickedTime n)
+                , label =
+                    column []
+                        [ el [ alignRight ] <| text a.startTime
+                        , el [ alignRight ] <| text "   ~   "
+                        , el [ alignRight ] <| text a.finishTime
+                        ]
+                }
     in
     List.map showColumn (times classTimeList)
 
