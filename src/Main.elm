@@ -32,6 +32,7 @@ type alias Lecture =
     , room : String
     , teacher : String
     , description : String
+    , jigen : Int
     }
 
 
@@ -42,7 +43,8 @@ type alias ClassTime =
 
 
 type alias Model =
-    { tableList : List (List Lecture)
+    { lectureList : List (List Lecture)
+    , workDays : Int
     , timeSchedule : List ClassTime
     , selectedBox : ( Int, Int )
     , selectedSchedule : Int
@@ -51,8 +53,19 @@ type alias Model =
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( Model [ [] ]
-        [ { startTime = "8:30", finishTime = "10:00" }, { startTime = "8:30", finishTime = "10:00" }, { startTime = "8:30", finishTime = "10:00" }, { startTime = "8:30", finishTime = "10:00" }, { startTime = "8:30", finishTime = "10:00" }, { startTime = "8:30", finishTime = "10:00" } ]
+    let
+        oneDay =
+            [ { className = "講義名", room = "教室", teacher = "担当教員", description = "メモ", jigen = 0 }
+            , { className = "講義名", room = "教室", teacher = "担当教員", description = "メモ", jigen = 1 }
+            , { className = "講義名", room = "教室", teacher = "担当教員", description = "メモ", jigen = 2 }
+            , { className = "講義名", room = "教室", teacher = "担当教員", description = "メモ", jigen = 3 }
+            , { className = "講義名", room = "教室", teacher = "担当教員", description = "メモ", jigen = 4 }
+            ]
+    in
+    ( Model
+        (List.repeat 6 oneDay)
+        6
+        [ { startTime = "8:30", finishTime = "10:00" }, { startTime = "8:30", finishTime = "10:00" }, { startTime = "8:30", finishTime = "10:00" }, { startTime = "8:30", finishTime = "10:00" }, { startTime = "8:30", finishTime = "10:00" } ]
         ( 0, 0 )
         0
     , Cmd.none
@@ -89,14 +102,40 @@ update msg model =
 view : Model -> Html.Html Msg
 view model =
     layout [] <|
-        column [ centerX ]
-            [ el [ Font.size 30, alignLeft ] <| text "sad"
-            , row []
-                [ column [ width (px 40) ] (viewTimeSchedule model.timeSchedule)
+        column [ centerX, width fill ]
+            [ row [ explain Debug.todo, width fill ]
+                [ column [] (viewTimeSchedule model.timeSchedule)
+
+                --, column [ width (px 70) ] genBoxs
+                , row [ width fill, height fill ] (columnMap (genBoxs model.lectureList))
                 ]
             ]
 
 
+columnMap : List (List (Element Msg)) -> List (Element Msg)
+columnMap aListList =
+    let
+        columnFun s =
+            column [ height fill, width fill ] s
+    in
+    List.map columnFun aListList
+
+
+genBoxs : List (List Lecture) -> List (List (Element Msg))
+genBoxs lecList =
+    let
+        genButton a =
+            Input.button [ BD.color (rgb255 0 0 0), BD.width 1, BD.solid, width fill, height fill ]
+                { onPress = Just (ClickedBox ( 0, 0 ))
+                , label =
+                    column [ alignTop ]
+                        [ el [ Font.size 16 ] <| text a.className
+                        , el [ Font.size 8 ] <| text a.teacher
+                        , el [ Font.size 10 ] <| text a.description
+                        ]
+                }
+    in
+    List.map (List.map genButton) lecList
 viewTimeSchedule : List ClassTime -> List (Element Msg)
 viewTimeSchedule classTimeList =
     let
